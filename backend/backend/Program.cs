@@ -1,4 +1,6 @@
 using Asp.Versioning;
+using backend.Data;
+using Microsoft.EntityFrameworkCore;
 using Serilog;
 using Serilog.Events;
 
@@ -19,6 +21,12 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddSerilog();
 
 builder.Services.AddControllers();
+
+var connString = builder.Configuration.GetConnectionString("DefaultConnection")
+    ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseNpgsql(connString));
 
 var app = builder.Build();
 

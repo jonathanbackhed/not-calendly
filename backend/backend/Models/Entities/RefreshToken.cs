@@ -12,6 +12,6 @@ namespace backend.Models.Entities
         public DateTime? RevokedAt { get; set; }
 
         public Guid UserId { get; set; }
-        public required User User { get; set; }
+        public User? User { get; set; }
     }
 }

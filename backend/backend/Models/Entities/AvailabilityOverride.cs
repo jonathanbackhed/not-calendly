@@ -14,5 +14,7 @@ namespace backend.Models.Entities
         public bool IsBlocked { get; set; } // full day
         public TimeOnly? StartTime { get; set; }
         public TimeOnly? EndTime { get; set; }
+        public DateTime CreatedAt { get; set; }
+        public DateTime? UpdatedAt { get; set; }
     }
 }

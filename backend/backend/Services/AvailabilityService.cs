@@ -1,0 +1,105 @@
+﻿using backend.Data;
+using backend.Exceptions;
+using backend.Models.DTOs.Requests;
+using backend.Models.DTOs.Responses;
+using backend.Models.Entities;
+using backend.Services.Interfaces;
+using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
+
+namespace backend.Services
+{
+    public class AvailabilityService : IAvailabilityService
+    {
+        private readonly AppDbContext _dbc;
+
+        public AvailabilityService(AppDbContext dbc)
+        {
+            _dbc = dbc;
+        }
+
+        public async Task<AvailabilityRuleResponse> CreateAsync(Guid userId, AvailabilityRequest request)
+        {
+            var exists = await _dbc.AvailabilityRules.AnyAsync(r => r.UserId == userId && r.DayOfWeek == request.DayOfWeek);
+            if (exists) 
+                throw new ConflictException("Availability rule for this day already exists.");
+
+            if (request.StartTime >= request.EndTime) 
+                throw new ValidationException("Start time must be before end time.");
+
+            var availabilityRule = new AvailabilityRule()
+            {
+                UserId = userId,
+                DayOfWeek = request.DayOfWeek,
+                StartTime = request.StartTime,
+                EndTime = request.EndTime,
+                IsActive = request.IsActive,
+                CreatedAt = DateTime.UtcNow
+            };
+
+            _dbc.AvailabilityRules.Add(availabilityRule);
+            await _dbc.SaveChangesAsync();
+
+            return new AvailabilityRuleResponse
+            {
+                Id = availabilityRule.Id,
+                DayOfWeek = availabilityRule.DayOfWeek,
+                StartTime = availabilityRule.StartTime,
+                EndTime = availabilityRule.EndTime,
+                IsActive = availabilityRule.IsActive,
+                CreatedAt = availabilityRule.CreatedAt
+            };
+        }
+
+        public async Task DeleteAsync(Guid userId, Guid availabilityRuleId)
+        {
+            var deleted = await _dbc.AvailabilityRules
+                .Where(r => r.Id == availabilityRuleId && r.UserId == userId)
+                .ExecuteDeleteAsync();
+
+            if (deleted == 0)
+                throw new NotFoundException("Availability rule not found.");
+        }
+
+        public async Task<AvailabilityResponse> GetAsync(Guid userId)
+        {
+            var availabilityRules = await _dbc.AvailabilityRules
+                .AsNoTracking()
+                .Where(r => r.UserId == userId)
+                .ToListAsync();
+
+            return new AvailabilityResponse
+            {
+                AvailabilityRules = availabilityRules
+            };
+        }
+
+        public async Task<AvailabilityRuleResponse> UpdateAsync(Guid userId, Guid availabilityRuleId, AvailabilityRequest request)
+        {
+            if (request.StartTime >= request.EndTime)
+                throw new ValidationException("Start time must be before end time.");
+
+            var rule = await _dbc.AvailabilityRules.FirstOrDefaultAsync(r => r.Id == availabilityRuleId && r.UserId == userId);
+            if (rule is null)
+                throw new NotFoundException("Availability rule not found.");
+
+            rule.DayOfWeek = request.DayOfWeek;
+            rule.StartTime = request.StartTime;
+            rule.EndTime = request.EndTime;
+            rule.IsActive = request.IsActive;
+            rule.UpdatedAt = DateTime.UtcNow;
+
+            await _dbc.SaveChangesAsync();
+
+            return new AvailabilityRuleResponse
+            {
+                Id = rule.Id,
+                DayOfWeek = rule.DayOfWeek,
+                StartTime = rule.StartTime,
+                EndTime = rule.EndTime,
+                IsActive = rule.IsActive,
+                CreatedAt = rule.CreatedAt,
+            };
+        }
+    }
+}

@@ -1,4 +1,7 @@
-﻿namespace backend.Middleware
+﻿using backend.Exceptions;
+using System.ComponentModel.DataAnnotations;
+
+namespace backend.Middleware
 {
     public class ExceptionHandlingMiddleware(RequestDelegate next)
     {
@@ -16,6 +19,16 @@
             catch (InvalidOperationException ex)
             {
                 context.Response.StatusCode = StatusCodes.Status409Conflict;
+                await context.Response.WriteAsJsonAsync(new { error = ex.Message });
+            }
+            catch(ConflictException ex)
+            {
+                context.Response.StatusCode = StatusCodes.Status409Conflict;
+                await context.Response.WriteAsJsonAsync(new { error = ex.Message });
+            }
+            catch(ValidationException ex)
+            {
+                context.Response.StatusCode = StatusCodes.Status400BadRequest;
                 await context.Response.WriteAsJsonAsync(new { error = ex.Message });
             }
             catch (Exception ex)

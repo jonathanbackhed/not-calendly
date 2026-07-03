@@ -28,5 +28,6 @@ namespace backend.Models.Entities
         public DateTime? UpdatedAt { get; set; }
 
         public ICollection<RefreshToken> RefreshTokens { get; set; } = [];
+        public ICollection<AvailabilityRule> AvailabilityRules { get; set; } = [];
     }
 }

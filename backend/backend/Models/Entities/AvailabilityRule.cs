@@ -2,7 +2,7 @@
 
 namespace backend.Models.Entities
 {
-    public class AvailabilityRules
+    public class AvailabilityRule
     {
         [Key]
         public Guid Id { get; set; }

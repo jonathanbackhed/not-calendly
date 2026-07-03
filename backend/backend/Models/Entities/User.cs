@@ -29,5 +29,6 @@ namespace backend.Models.Entities
 
         public ICollection<RefreshToken> RefreshTokens { get; set; } = [];
         public ICollection<AvailabilityRule> AvailabilityRules { get; set; } = [];
+        public ICollection<AvailabilityOverride> AvailabilityOverrides { get; set; } = [];
     }
 }

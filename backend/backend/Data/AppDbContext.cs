@@ -12,6 +12,7 @@ namespace backend.Data
         public DbSet<User> Users { get; set; }
         public DbSet<RefreshToken> RefreshTokens { get; set; }
         public DbSet<AvailabilityRule> AvailabilityRules { get; set; }
+        public DbSet<AvailabilityOverride> AvailabilityOverrides { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -26,6 +27,10 @@ namespace backend.Data
 
             modelBuilder.Entity<AvailabilityRule>()
                 .HasIndex(a => new { a.UserId, a.DayOfWeek })
+                .IsUnique();
+
+            modelBuilder.Entity<AvailabilityOverride>()
+                .HasIndex(a => new { a.UserId, a.OverrideDate })
                 .IsUnique();
         }
     }

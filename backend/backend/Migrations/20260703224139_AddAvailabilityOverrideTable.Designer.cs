@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using backend.Data;
@@ -11,9 +12,11 @@ using backend.Data;
 namespace backend.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260703224139_AddAvailabilityOverrideTable")]
+    partial class AddAvailabilityOverrideTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -28,9 +31,6 @@ namespace backend.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
                     b.Property<TimeOnly?>("EndTime")
                         .HasColumnType("time without time zone");
 
@@ -42,9 +42,6 @@ namespace backend.Migrations
 
                     b.Property<TimeOnly?>("StartTime")
                         .HasColumnType("time without time zone");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
 
                     b.Property<Guid>("UserId")
                         .HasColumnType("uuid");
@@ -168,7 +165,7 @@ namespace backend.Migrations
             modelBuilder.Entity("backend.Models.Entities.AvailabilityOverride", b =>
                 {
                     b.HasOne("backend.Models.Entities.User", "User")
-                        .WithMany("AvailabilityOverrides")
+                        .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -200,8 +197,6 @@ namespace backend.Migrations
 
             modelBuilder.Entity("backend.Models.Entities.User", b =>
                 {
-                    b.Navigation("AvailabilityOverrides");
-
                     b.Navigation("AvailabilityRules");
 
                     b.Navigation("RefreshTokens");

@@ -8,6 +8,7 @@ namespace backend.Models.DTOs.Requests
         public required string Title { get; init; }
 
         [MaxLength(50)]
+        [RegularExpression(@"^[a-z0-9-]+$", ErrorMessage = "Slug may only contain lowercase letters, numbers and hyphens.")]
         public required string Slug { get; init; }
 
         [Range(15, 720)]

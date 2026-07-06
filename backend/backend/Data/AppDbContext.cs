@@ -13,6 +13,7 @@ namespace backend.Data
         public DbSet<RefreshToken> RefreshTokens { get; set; }
         public DbSet<AvailabilityRule> AvailabilityRules { get; set; }
         public DbSet<AvailabilityOverride> AvailabilityOverrides { get; set; }
+        public DbSet<EventType> EventTypes { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -31,6 +32,10 @@ namespace backend.Data
 
             modelBuilder.Entity<AvailabilityOverride>()
                 .HasIndex(a => new { a.UserId, a.OverrideDate })
+                .IsUnique();
+
+            modelBuilder.Entity<EventType>()
+                .HasIndex(a => new { a.UserId, a.Slug })
                 .IsUnique();
         }
     }

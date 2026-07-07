@@ -18,7 +18,7 @@ namespace backend.Services
             _dbc = dbc;
         }
 
-        public async Task<AvailabilityRuleResponse> CreateAsync(Guid userId, AvailabilityRequest request)
+        public async Task<AvailabilityResponse> CreateAsync(Guid userId, AvailabilityRequest request)
         {
             var exists = await _dbc.AvailabilityRules.AnyAsync(r => r.UserId == userId && r.DayOfWeek == request.DayOfWeek);
             if (exists) 
@@ -40,7 +40,7 @@ namespace backend.Services
             _dbc.AvailabilityRules.Add(availabilityRule);
             await _dbc.SaveChangesAsync();
 
-            return new AvailabilityRuleResponse
+            return new AvailabilityResponse
             {
                 Id = availabilityRule.Id,
                 DayOfWeek = availabilityRule.DayOfWeek,
@@ -61,20 +61,26 @@ namespace backend.Services
                 throw new NotFoundException("Availability rule not found.");
         }
 
-        public async Task<AvailabilityResponse> GetAsync(Guid userId)
+        public async Task<IEnumerable<AvailabilityResponse>> GetAsync(Guid userId)
         {
             var availabilityRules = await _dbc.AvailabilityRules
                 .AsNoTracking()
                 .Where(r => r.UserId == userId)
+                .Select(r => new AvailabilityResponse
+                {
+                    Id = r.Id,
+                    DayOfWeek = r.DayOfWeek,
+                    StartTime = r.StartTime,
+                    EndTime = r.EndTime,
+                    IsActive = r.IsActive,
+                    CreatedAt = r.CreatedAt
+                })
                 .ToListAsync();
 
-            return new AvailabilityResponse
-            {
-                AvailabilityRules = availabilityRules
-            };
+            return availabilityRules;
         }
 
-        public async Task<AvailabilityRuleResponse> UpdateAsync(Guid userId, Guid availabilityRuleId, AvailabilityRequest request)
+        public async Task<AvailabilityResponse> UpdateAsync(Guid userId, Guid availabilityRuleId, AvailabilityRequest request)
         {
             if (request.StartTime >= request.EndTime)
                 throw new ValidationException("Start time must be before end time.");
@@ -91,7 +97,7 @@ namespace backend.Services
 
             await _dbc.SaveChangesAsync();
 
-            return new AvailabilityRuleResponse
+            return new AvailabilityResponse
             {
                 Id = rule.Id,
                 DayOfWeek = rule.DayOfWeek,

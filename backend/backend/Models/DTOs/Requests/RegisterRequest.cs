@@ -1,5 +1,4 @@
-﻿using System.ComponentModel;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace backend.Models.DTOs.Requests
 {
@@ -21,6 +20,7 @@ namespace backend.Models.DTOs.Requests
 
         [Required]
         [MaxLength(50)]
+        [RegularExpression(@"^[a-z0-9-]+$", ErrorMessage = "Slug may only contain lowercase letters, numbers and hyphens.")]
         public required string Slug { get; init; }
     }
 }

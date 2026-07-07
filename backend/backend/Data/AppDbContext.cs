@@ -14,6 +14,7 @@ namespace backend.Data
         public DbSet<AvailabilityRule> AvailabilityRules { get; set; }
         public DbSet<AvailabilityOverride> AvailabilityOverrides { get; set; }
         public DbSet<EventType> EventTypes { get; set; }
+        public DbSet<Booking> Bookings { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -37,6 +38,9 @@ namespace backend.Data
             modelBuilder.Entity<EventType>()
                 .HasIndex(a => new { a.UserId, a.Slug })
                 .IsUnique();
+
+            modelBuilder.Entity<Booking>()
+                .HasIndex(a => new { a.UserId, a.StartsAt });
         }
     }
 }

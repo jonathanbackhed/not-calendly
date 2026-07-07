@@ -67,17 +67,23 @@ namespace backend.Services
                 throw new NotFoundException("Availability override not found.");
         }
 
-        public async Task<OverridesResponse> GetAsync(Guid userId)
+        public async Task<IEnumerable<AvailabilityOverrideResponse>> GetAsync(Guid userId)
         {
             var overrides = await _dbc.AvailabilityOverrides
                 .AsNoTracking()
                 .Where(r => r.UserId == userId)
+                .Select(r => new AvailabilityOverrideResponse
+                {
+                    Id = r.Id,
+                    OverrideDate = r.OverrideDate,
+                    IsBlocked = r.IsBlocked,
+                    StartTime = r.StartTime,
+                    EndTime = r.EndTime,
+                    CreatedAt = r.CreatedAt
+                })
                 .ToListAsync();
 
-            return new OverridesResponse
-            {
-                AvailabilityOverrides = overrides
-            };
+            return overrides;
         }
 
         public async Task<AvailabilityOverrideResponse> UpdateAsync(Guid userId, Guid overrideId, AvailabilityOverrideRequest request)

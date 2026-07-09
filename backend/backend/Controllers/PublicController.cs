@@ -54,6 +54,8 @@ namespace backend.Controllers
 
             await _reservationService.RemoveReservationAsync(userSlug, eventTypeSlug, startsAt, reservationToken);
 
+            Response.Cookies.Delete("reservation_token");
+
             return Ok();
         }
     }

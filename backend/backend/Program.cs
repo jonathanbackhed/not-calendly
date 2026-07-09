@@ -1,4 +1,4 @@
-using Asp.Versioning;
+using backend.Cache;
 using backend.Data;
 using backend.Middleware;
 using backend.Services;
@@ -28,6 +28,10 @@ builder.Services.AddSerilog();
 
 builder.Services.AddControllers();
 
+builder.Services.AddMemoryCache();
+builder.Services.AddSingleton<ReservationCache>();
+
+// Services
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IAvailabilityService, AvailabilityService>();
 builder.Services.AddScoped<IAvailabilityOverrideService, AvailabilityOverrideService>();
@@ -56,6 +60,8 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ClockSkew = TimeSpan.Zero
         };
     });
+
+builder.Services.AddAuthorization();
 
 var app = builder.Build();
 

@@ -37,6 +37,7 @@ builder.Services.AddScoped<IAvailabilityService, AvailabilityService>();
 builder.Services.AddScoped<IAvailabilityOverrideService, AvailabilityOverrideService>();
 builder.Services.AddScoped<IEventTypeService, EventTypeService>();
 builder.Services.AddScoped<ISlotService, SlotService>();
+builder.Services.AddScoped<IReservationService, ReservationService>();
 
 var connString = builder.Configuration.GetConnectionString("DefaultConnection")
     ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");

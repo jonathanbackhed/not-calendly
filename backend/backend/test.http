@@ -1,0 +1,62 @@
+
+@baseUrl = https://localhost:7054/api
+@token = 
+
+### Create new fake user
+POST {{baseUrl}}/auth/register
+Content-type: application/json
+{
+  "Username": "johndoe",
+  "Email": "john@doe.com",
+  "Password": "Password123!",
+  "Slug": "johndoe"
+}
+
+### Login with fake user
+POST {{baseUrl}}/auth/login
+Content-type: application/json
+{
+  "Email": "john@doe.com",
+  "Password": "Password123!"
+}
+
+### Create new availability rule (auth)
+POST {{baseUrl}}/me/availability
+Authorization: Bearer {{token}}
+Content-type: application/json
+{
+  "DayOfWeek": 1,
+  "StartTime": "09:00",
+  "EndTime": "17:00",
+  "IsActive": true
+}
+
+### Create new availability override (auth)
+POST {{baseUrl}}/me/overrides
+Authorization: Bearer {{token}}
+Content-type: application/json
+{
+  "OverrideDate": "2026-07-13",
+  "IsBlocked": false,
+  "StartTime": "12:00",
+  "EndTime": "14:00"
+}
+
+### Create new event type (auth)
+POST {{baseUrl}}/me/event-types
+Authorization: Bearer {{token}}
+Content-type: application/json
+{
+  "Title": "Intro Call",
+  "Slug": "intro-call",
+  "DurationMinutes": 30,
+  "LocationType": "Online",
+  "LocationValue": "Google Meet",
+  "BufferBeforeMinutes": 5,
+  "BufferAfterMinutes": 5,
+  "MaxDaysInAdvance": 30,
+  "IsActive": true
+}
+
+### Get available days for a specific month
+GET {{baseUrl}}/public/johndoe/intro-call/days?year=2026&month=7

@@ -60,3 +60,6 @@ Content-type: application/json
 
 ### Get available days for a specific month
 GET {{baseUrl}}/public/johndoe/intro-call/availabledays?year=2026&month=7
+
+### Get available slots for a specific date
+GET {{baseUrl}}/public/johndoe/intro-call/availableslots?date=2026-07-13

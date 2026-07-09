@@ -21,5 +21,13 @@ namespace backend.Controllers
 
             return Ok(availableDates);
         }
+
+        [HttpGet("{userSlug}/{eventTypeSlug}/availableslots")]
+        public async Task<IActionResult> GetAvailableSlotsForDate([FromRoute] string userSlug, [FromRoute] string eventTypeSlug, [FromQuery] DateOnly date)
+        {
+            var availableSlots = await _slotService.GetAvailableSlotsForDateAsync(userSlug, eventTypeSlug, date);
+
+            return Ok(availableSlots);
+        }
     }
 }

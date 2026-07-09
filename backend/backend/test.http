@@ -59,4 +59,4 @@ Content-type: application/json
 }
 
 ### Get available days for a specific month
-GET {{baseUrl}}/public/johndoe/intro-call/days?year=2026&month=7
+GET {{baseUrl}}/public/johndoe/intro-call/availabledays?year=2026&month=7

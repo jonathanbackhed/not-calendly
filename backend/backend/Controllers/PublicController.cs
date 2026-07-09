@@ -14,7 +14,7 @@ namespace backend.Controllers
             _slotService = slotService;
         }
 
-        [HttpGet("{userSlug}/{eventTypeSlug}/days")]
+        [HttpGet("{userSlug}/{eventTypeSlug}/availabledays")]
         public async Task<IActionResult> GetAvailableDatesForMonth([FromRoute] string userSlug, [FromRoute] string eventTypeSlug, [FromQuery] int year, [FromQuery] int month)
         {
             var availableDates = await _slotService.GetAvailableDatesForMonthAsync(userSlug, eventTypeSlug, year, month);

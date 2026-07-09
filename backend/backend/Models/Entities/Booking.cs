@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using backend.Enums;
+using System.ComponentModel.DataAnnotations;
 
 namespace backend.Models.Entities
 {
@@ -24,7 +25,7 @@ namespace backend.Models.Entities
         public DateTime StartsAt { get; set; }
         public DateTime EndsAt { get; set; }
 
-        public required string Status { get; set; }
+        public BookingStatus Status { get; set; }
         public required string CancelToken { get; set; }
         public string? Notes { get; set; }
         public DateTime CreatedAt { get; set; }

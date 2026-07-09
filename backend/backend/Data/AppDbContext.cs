@@ -41,6 +41,10 @@ namespace backend.Data
 
             modelBuilder.Entity<Booking>()
                 .HasIndex(a => new { a.UserId, a.StartsAt });
+
+            modelBuilder.Entity<Booking>()
+                .Property(a => a.Status)
+                .HasConversion<string>();
         }
     }
 }

@@ -11,10 +11,26 @@ namespace backend.Cache
             _cache = cache;
         }
 
-        public void AddReservation(Guid userId, Guid eventTypeId, DateTime startsAt)
+        public string Reserve(Guid userId, Guid eventTypeId, DateTime startsAt)
         {
             var key = $"reservation:{userId}:{eventTypeId}:{startsAt:yyyy-MM-ddTHH:mm}";
-            _cache.Set(key, true, TimeSpan.FromMinutes(5));
+            var token = Guid.NewGuid().ToString();
+
+            _cache.Set(key, token, TimeSpan.FromMinutes(5));
+
+            return token;
+        }
+
+        public bool Release(Guid userId, Guid eventTypeId, DateTime startsAt, string token)
+        {
+            var key = $"reservation:{userId}:{eventTypeId}:{startsAt:yyyy-MM-ddTHH:mm}";
+            if (_cache.TryGetValue(key, out string? cachedToken) && cachedToken == token)
+            {
+                _cache.Remove(key);
+                return true;
+            }
+
+            return false;
         }
 
         public bool IsReserved(Guid userId, Guid eventTypeId, DateTime startsAt)

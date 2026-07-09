@@ -1,4 +1,5 @@
-﻿using backend.Data;
+﻿using backend.Cache;
+using backend.Data;
 using backend.Enums;
 using backend.Exceptions;
 using backend.Models.DTOs.Responses;
@@ -10,10 +11,12 @@ namespace backend.Services
     public class SlotService : ISlotService
     {
         private readonly AppDbContext _dbc;
+        private readonly ReservationCache _cache;
 
-        public SlotService(AppDbContext dbc)
+        public SlotService(AppDbContext dbc, ReservationCache cache)
         {
             _dbc = dbc;
+            _cache = cache;
         }
 
         public async Task<IEnumerable<DateOnly>> GetAvailableDatesForMonthAsync(string userSlug, string eventTypeSlug, int year, int month)
@@ -94,8 +97,9 @@ namespace backend.Services
                 var bufferEnd = slotEnd.AddMinutes(eventType.BufferAfterMinutes);
 
                 var hasConflict = existingBookings.Any(r => bufferStart < r.EndsAt && bufferEnd > r.StartsAt);
+                var isReserved = _cache.IsReserved(eventType.UserId, eventType.Id, slotStart);
 
-                if (!hasConflict)
+                if (!hasConflict && !isReserved)
                 {
                     slots.Add(new SlotResponse
                     {

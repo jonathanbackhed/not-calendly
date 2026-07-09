@@ -1,0 +1,113 @@
+﻿using backend.Data;
+using backend.Enums;
+using backend.Exceptions;
+using backend.Models.DTOs.Responses;
+using backend.Services.Interfaces;
+using Microsoft.EntityFrameworkCore;
+
+namespace backend.Services
+{
+    public class SlotService : ISlotService
+    {
+        private readonly AppDbContext _dbc;
+
+        public SlotService(AppDbContext dbc)
+        {
+            _dbc = dbc;
+        }
+
+        public async Task<IEnumerable<DateOnly>> GetAvailableDatesForMonthAsync(string userSlug, string eventTypeSlug, int year, int month)
+        {
+            var eventType = await _dbc.EventTypes.FirstOrDefaultAsync(r => r.Slug == eventTypeSlug && r.User!.Slug == userSlug && r.IsActive);
+            if (eventType is null)
+                throw new NotFoundException("Event type not found");
+
+            var availabilityRules = await _dbc.AvailabilityRules
+                .Where(r => r.UserId == eventType.UserId && r.IsActive)
+                .ToListAsync();
+            if (!availabilityRules.Any())
+                return Enumerable.Empty<DateOnly>();
+
+            var today = DateOnly.FromDateTime(DateTime.UtcNow);
+            var lastDay = new DateOnly(year, month, 1).AddMonths(1).AddDays(-1);
+
+            var overrides = await _dbc.AvailabilityOverrides
+                .Where(r => r.UserId == eventType.UserId && r.OverrideDate >= today && r.OverrideDate <= lastDay)
+                .ToListAsync();
+
+            var maxDate = today.AddDays(eventType.MaxDaysInAdvance);
+            var availableDates = new List<DateOnly>();
+
+            for (var date = today; date <= lastDay; date = date.AddDays(1))
+            {
+                if (date > maxDate)
+                    continue;
+
+                var dayOfWeek = (int)date.DayOfWeek;
+                var rule = availabilityRules.FirstOrDefault(r => r.DayOfWeek == dayOfWeek);
+                if (rule is null)
+                    continue;
+
+                var overrideRule = overrides.FirstOrDefault(r => r.OverrideDate == date);
+                if (overrideRule is not null && overrideRule.IsBlocked)
+                    continue;
+
+                availableDates.Add(date);
+            }
+
+            return availableDates;
+        }
+
+        public async Task<IEnumerable<SlotResponse>> GetAvailableSlotsForDateAsync(string userSlug, string eventTypeSlug, DateOnly date)
+        {
+            var eventType = await _dbc.EventTypes
+                .FirstOrDefaultAsync(r => r.Slug == eventTypeSlug && r.User!.Slug == userSlug && r.IsActive);
+            if (eventType is null)
+                throw new NotFoundException("Event type not found");
+
+            var availabilityRule = await _dbc.AvailabilityRules
+                .FirstOrDefaultAsync(r => r.UserId == eventType.UserId && r.IsActive && r.DayOfWeek == (int)date.DayOfWeek);
+            if (availabilityRule is null)
+                return Enumerable.Empty<SlotResponse>();
+
+            var availabilityOverride = await _dbc.AvailabilityOverrides
+                .FirstOrDefaultAsync(r => r.UserId == eventType.UserId && r.OverrideDate == date);
+            if (availabilityOverride is not null && availabilityOverride.IsBlocked)
+                return Enumerable.Empty<SlotResponse>();
+
+            var startTime = availabilityOverride?.StartTime ?? availabilityRule.StartTime;
+            var endTime = availabilityOverride?.EndTime ?? availabilityRule.EndTime;
+
+            var existingBookings = await _dbc.Bookings
+                .Where(r => r.UserId == eventType.UserId && DateOnly.FromDateTime(r.StartsAt) == date && r.Status != BookingStatus.Cancelled)
+                .ToListAsync();
+
+            var slots = new List<SlotResponse>();
+            var current = startTime;
+
+            while (current.AddMinutes(eventType.DurationMinutes) <= endTime)
+            {
+                var slotStart = date.ToDateTime(current, DateTimeKind.Utc);
+                var slotEnd = slotStart.AddMinutes(eventType.DurationMinutes);
+
+                var bufferStart = slotStart.AddMinutes(-eventType.BufferBeforeMinutes);
+                var bufferEnd = slotEnd.AddMinutes(eventType.BufferAfterMinutes);
+
+                var hasConflict = existingBookings.Any(r => bufferStart < r.EndsAt && bufferEnd > r.StartsAt);
+
+                if (!hasConflict)
+                {
+                    slots.Add(new SlotResponse
+                    {
+                        StartsAt = slotStart,
+                        EndsAt = slotEnd
+                    });
+                }
+
+                current = current.AddMinutes(eventType.DurationMinutes);
+            }
+
+            return slots;
+        }
+    }
+}

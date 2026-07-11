@@ -14,10 +14,14 @@ using System.Threading.RateLimiting;
 
 Log.Logger = new LoggerConfiguration()
     .MinimumLevel.Information()
+    .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
+    .MinimumLevel.Override("System", LogEventLevel.Warning)
     .MinimumLevel.Override("Microsoft.EntityFrameworkCore", LogEventLevel.Warning)
-    .MinimumLevel.Override("Microsoft.EntityFrameworkCore.Database.Command", LogEventLevel.Warning)
-    .WriteTo.Console()
-    .WriteTo.File("logs/log-.txt", rollingInterval: RollingInterval.Day, retainedFileCountLimit: 14)
+    .WriteTo.Console(outputTemplate: "[{Timestamp:yyyy-MM-dd HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}{Exception}{NewLine}")
+    .WriteTo.File("logs/log-.txt", 
+        rollingInterval: RollingInterval.Day, 
+        retainedFileCountLimit: 14, 
+        outputTemplate: "[{Timestamp:yyyy-MM-dd HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}{Exception}{NewLine}")
     .CreateLogger();
 
 Log.Information("Starting API...");

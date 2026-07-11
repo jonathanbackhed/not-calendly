@@ -4,6 +4,7 @@ using backend.Middleware;
 using backend.Services;
 using backend.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Serilog;
@@ -85,6 +86,13 @@ builder.Services.AddRateLimiter(options =>
                 QueueLimit = 0
             })
         );
+
+    options.AddSlidingWindowLimiter("auth", options =>
+    {
+        options.PermitLimit = 10;
+        options.Window = TimeSpan.FromMinutes(1);
+        options.QueueLimit = 0;
+    });
 });
 
 var app = builder.Build();

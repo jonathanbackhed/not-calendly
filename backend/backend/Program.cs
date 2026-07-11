@@ -92,6 +92,7 @@ builder.Services.AddRateLimiter(options =>
         options.PermitLimit = 10;
         options.Window = TimeSpan.FromMinutes(1);
         options.QueueLimit = 0;
+        options.SegmentsPerWindow = 6;
     });
 });
 

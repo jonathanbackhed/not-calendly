@@ -11,11 +11,13 @@ namespace backend.Services
     {
         private readonly ReservationCache _cache;
         private readonly AppDbContext _dbc;
+        private readonly ILogger<ReservationService> _logger;
 
-        public ReservationService(ReservationCache cache, AppDbContext dbc)
+        public ReservationService(ReservationCache cache, AppDbContext dbc, ILogger<ReservationService> logger)
         {
             _cache = cache;
             _dbc = dbc;
+            _logger = logger;
         }
 
         public async Task<string> AddReservationAsync(string userSlug, string eventTypeSlug, DateTime startsAt)
@@ -29,9 +31,15 @@ namespace backend.Services
                 throw new ValidationException("Cannot reserve a slot in the past");
 
             if (_cache.IsReserved(eventType.UserId, eventType.Id, startsAt))
+            {
+                _logger.LogWarning("Slot reservation attempt for already reserved slot. Event type {EventTypeId} at {StartsAt}", eventType.Id, startsAt);
                 throw new ConflictException("This slot is already reserved.");
+            }
+                
 
             var token = _cache.Reserve(eventType.UserId, eventType.Id, startsAt);
+
+            _logger.LogInformation("Slot reserved for event type {EventTypeId} at {StartsAt}", eventType.Id, startsAt);
 
             return token;
         }
@@ -47,11 +55,19 @@ namespace backend.Services
                 throw new ValidationException("Cannot reserve a slot in the past");
 
             if (!_cache.IsReserved(eventType.UserId, eventType.Id, startsAt))
+            {
+                _logger.LogWarning("Release attempt for non-reserved slot. Event type {EventTypeId} at {StartsAt}", eventType.Id, startsAt);
                 throw new ConflictException("This slot is not reserved.");
+            }
 
             var released = _cache.Release(eventType.UserId, eventType.Id, startsAt, token);
             if (!released)
+            {
+                _logger.LogWarning("Invalid reservation token for event type {EventTypeId} at {StartsAt}", eventType.Id, startsAt);
                 throw new ValidationException("Invalid reservation token");
+            }
+
+            _logger.LogInformation("Slot reservation release for event type {EventTypeId} at {StartsAt}", eventType.Id, startsAt);
         }
     }
 }

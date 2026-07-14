@@ -48,7 +48,7 @@ namespace backend.Services
             _dbc.AvailabilityOverrides.Add(overrideEntity);
             await _dbc.SaveChangesAsync();
 
-            _logger.LogInformation("Availability override created for user {UserId} on {OverrideDate}", userId, overrideEntity.CreatedAt);
+            _logger.LogInformation("Availability override created for user {UserId} on {OverrideDate}", userId, overrideEntity.OverrideDate);
 
             return new AvailabilityOverrideResponse
             {

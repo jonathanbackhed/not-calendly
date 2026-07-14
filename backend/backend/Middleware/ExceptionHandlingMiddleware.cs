@@ -5,7 +5,7 @@ namespace backend.Middleware
 {
     public class ExceptionHandlingMiddleware(RequestDelegate next)
     {
-        public async Task InvokeAsync(HttpContext context)
+        public async Task InvokeAsync(HttpContext context, ILogger<ExceptionHandlingMiddleware> logger)
 		{
 			try
 			{
@@ -33,6 +33,8 @@ namespace backend.Middleware
             }
             catch (Exception ex)
 			{
+                logger.LogError(ex, "Unhandled exception for {Method} {Path}", context.Request.Method, context.Request.Path);
+
                 context.Response.StatusCode = StatusCodes.Status500InternalServerError;
                 await context.Response.WriteAsJsonAsync(new { error = "An unexpected error occurred." });
             }

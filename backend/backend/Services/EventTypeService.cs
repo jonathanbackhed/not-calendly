@@ -12,10 +12,12 @@ namespace backend.Services
     public class EventTypeService : IEventTypeService
     {
         private readonly AppDbContext _dbc;
+        private readonly ILogger<EventTypeService> _logger;
 
-        public EventTypeService(AppDbContext dbc)
+        public EventTypeService(AppDbContext dbc, ILogger<EventTypeService> logger)
         {
             _dbc = dbc;
+            _logger = logger;
         }
 
         public async Task<EventTypeResponse> CreateAsync(Guid userId, EventTypeRequest request)
@@ -45,6 +47,8 @@ namespace backend.Services
             _dbc.EventTypes.Add(eventType);
             await _dbc.SaveChangesAsync();
 
+            _logger.LogInformation("Event type {Slug} created for user {UserId} ", eventType.Slug, userId);
+
             return new EventTypeResponse
             {
                 Id = eventType.Id,
@@ -69,6 +73,8 @@ namespace backend.Services
 
             if (deleted == 0)
                 throw new NotFoundException("Event type not found.");
+
+            _logger.LogInformation("Event type {EventTypeId} deleted by user {UserId}", eventTypeId, userId);
         }
 
         public async Task<IEnumerable<EventTypeResponse>> GetAsync(Guid userId)
@@ -118,6 +124,8 @@ namespace backend.Services
             eventType.UpdatedAt = DateTime.UtcNow;
 
             await _dbc.SaveChangesAsync();
+
+            _logger.LogInformation("Event type {EventTypeId} updated by user {UserId}", eventTypeId, userId);
 
             return new EventTypeResponse
             {

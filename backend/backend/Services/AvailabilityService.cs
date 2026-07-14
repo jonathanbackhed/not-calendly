@@ -12,10 +12,12 @@ namespace backend.Services
     public class AvailabilityService : IAvailabilityService
     {
         private readonly AppDbContext _dbc;
+        private readonly ILogger<AvailabilityService> _logger;
 
-        public AvailabilityService(AppDbContext dbc)
+        public AvailabilityService(AppDbContext dbc, ILogger<AvailabilityService> logger)
         {
             _dbc = dbc;
+            _logger = logger;
         }
 
         public async Task<AvailabilityResponse> CreateAsync(Guid userId, AvailabilityRequest request)
@@ -40,6 +42,8 @@ namespace backend.Services
             _dbc.AvailabilityRules.Add(availabilityRule);
             await _dbc.SaveChangesAsync();
 
+            _logger.LogInformation("Availability rule created for user {UserId} on day {DayOfWeek}", userId, (DayOfWeek)availabilityRule.DayOfWeek);
+
             return new AvailabilityResponse
             {
                 Id = availabilityRule.Id,
@@ -59,6 +63,8 @@ namespace backend.Services
 
             if (deleted == 0)
                 throw new NotFoundException("Availability rule not found.");
+
+            _logger.LogInformation("Availability rule {RuleId} deleted by user {UserId}", availabilityRuleId, userId);
         }
 
         public async Task<IEnumerable<AvailabilityResponse>> GetAsync(Guid userId)
@@ -96,6 +102,8 @@ namespace backend.Services
             rule.UpdatedAt = DateTime.UtcNow;
 
             await _dbc.SaveChangesAsync();
+
+            _logger.LogInformation("Availability rule {RuleId} updated by user {UserId}", availabilityRuleId, userId);
 
             return new AvailabilityResponse
             {

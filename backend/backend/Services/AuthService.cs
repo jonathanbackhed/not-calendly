@@ -16,21 +16,25 @@ namespace backend.Services
     {
         private readonly AppDbContext _dbc;
         private readonly IConfiguration _config;
+        private readonly ILogger<AuthService> _logger;
 
-        public AuthService(AppDbContext dbc, IConfiguration config)
+        public AuthService(AppDbContext dbc, IConfiguration config, ILogger<AuthService> logger)
         {
             _dbc = dbc;
             _config = config;
+            _logger = logger;
         }
 
         public async Task<AuthResponse> LoginAsync(LoginRequest request)
         {
-            var user = await _dbc.Users.SingleOrDefaultAsync(u => u.Email == request.Email.ToLowerInvariant())
-                ?? throw new UnauthorizedAccessException("Invalid credentials.");
-
-            if (!BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
+            var user = await _dbc.Users.SingleOrDefaultAsync(u => u.Email == request.Email.ToLowerInvariant());
+            if (user is null || !BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
+            {
+                _logger.LogWarning("Failed login attempt for email {Email}", request.Email);
                 throw new UnauthorizedAccessException("Invalid credentials.");
+            }
 
+            _logger.LogInformation("User logged in with email {Email}", request.Email);
             return await IssueTokensAsync(user);
         }
 
@@ -38,15 +42,24 @@ namespace backend.Services
         {
             var stored = await _dbc.RefreshTokens
                 .Include(i => i.User)
-                .SingleOrDefaultAsync(s => s.Token == refreshToken)
-                    ?? throw new UnauthorizedAccessException("Invalid token.");
+                .SingleOrDefaultAsync(s => s.Token == refreshToken);
+
+            if (stored is null)
+            {
+                _logger.LogWarning("Refresh attempt with unknown token");
+                throw new UnauthorizedAccessException("Invalid token.");
+            }
 
             if (stored.RevokedAt is not null || stored.ExpiresAt < DateTime.UtcNow)
+            {
+                _logger.LogWarning("Refresh attempt with revoked or expired token for user {User}", stored.UserId);
                 throw new UnauthorizedAccessException("Token expired or revoked.");
+            }
 
             stored.RevokedAt = DateTime.UtcNow;
             await _dbc.SaveChangesAsync();
 
+            _logger.LogInformation("Token refreshed for user {UserId}", stored.UserId);
             return await IssueTokensAsync(stored.User!);
         }
 
@@ -62,11 +75,20 @@ namespace backend.Services
             if (existing is not null)
             {
                 if (existing.Email == request.Email.ToLowerInvariant())
+                {
+                    _logger.LogWarning("Registration attempt with existing email {Email}", request.Email);
                     throw new InvalidOperationException("Email already in use.");
+                }
                 if (existing.Username.ToLower() == request.Username.ToLower())
+                {
+                    _logger.LogWarning("Registration attempt with existing username {Username}", request.Username);
                     throw new InvalidOperationException("Username already in use.");
+                }
                 if (existing.Slug.ToLower() == request.Slug.ToLower())
+                {
+                    _logger.LogWarning("Registration attempt with existing slug {Slug}", request.Slug);
                     throw new InvalidOperationException("Slug already in use.");
+                }
             }
 
             var user = new User
@@ -82,16 +104,22 @@ namespace backend.Services
             _dbc.Users.Add(user);
             await _dbc.SaveChangesAsync();
 
+            _logger.LogInformation("User registered with email {Email}", user.Email);
             return await IssueTokensAsync(user);
         }
 
         public async Task RevokeAsync(string refreshToken)
         {
             var stored = await _dbc.RefreshTokens.SingleOrDefaultAsync(s => s.Token == refreshToken);
-            if (stored is null) return;
+            if (stored is null)
+            {
+                _logger.LogWarning("User tried to logout with invalid refresh token {RefreshToken}", refreshToken);
+                return;
+            }
 
             stored.RevokedAt = DateTime.UtcNow;
             await _dbc.SaveChangesAsync();
+            _logger.LogInformation("User {UserId} logged out", stored.UserId);
         }
 
         private async Task<AuthResponse> IssueTokensAsync(User user)

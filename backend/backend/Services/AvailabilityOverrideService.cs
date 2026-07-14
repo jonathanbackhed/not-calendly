@@ -12,10 +12,12 @@ namespace backend.Services
     public class AvailabilityOverrideService : IAvailabilityOverrideService
     {
         private readonly AppDbContext _dbc;
+        private readonly ILogger<AvailabilityOverrideService> _logger;
 
-        public AvailabilityOverrideService(AppDbContext dbc)
+        public AvailabilityOverrideService(AppDbContext dbc, ILogger<AvailabilityOverrideService> logger)
         {
             _dbc = dbc;
+            _logger = logger;
         }
 
         public async Task<AvailabilityOverrideResponse> CreateAsync(Guid userId, AvailabilityOverrideRequest request)
@@ -46,6 +48,8 @@ namespace backend.Services
             _dbc.AvailabilityOverrides.Add(overrideEntity);
             await _dbc.SaveChangesAsync();
 
+            _logger.LogInformation("Availability override created for user {UserId} on {OverrideDate}", userId, overrideEntity.CreatedAt);
+
             return new AvailabilityOverrideResponse
             {
                 Id = overrideEntity.Id,
@@ -65,6 +69,8 @@ namespace backend.Services
 
             if (deleted == 0)
                 throw new NotFoundException("Availability override not found.");
+
+            _logger.LogInformation("Availability override {OverrideId} deleted by user {Userid}", overrideId, userId);
         }
 
         public async Task<IEnumerable<AvailabilityOverrideResponse>> GetAsync(Guid userId)
@@ -108,6 +114,8 @@ namespace backend.Services
             overrideEntity.UpdatedAt = DateTime.UtcNow;
 
             await _dbc.SaveChangesAsync();
+
+            _logger.LogInformation("Availability override {OverrideId} updated by user {UserId}", overrideId, userId);
 
             return new AvailabilityOverrideResponse
             {

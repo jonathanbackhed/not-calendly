@@ -67,7 +67,7 @@ namespace backend.Services
                 StartsAt = startsAt,
                 EndsAt = startsAt.AddMinutes(eventType.DurationMinutes),
                 Status = BookingStatus.Pending,
-                CancelToken = Guid.NewGuid().ToString(),
+                CancelToken = Guid.NewGuid().ToString("N"),
                 Notes = request.Notes,
                 CreatedAt = DateTime.UtcNow
             };

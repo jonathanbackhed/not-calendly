@@ -12,5 +12,7 @@ namespace backend.Models.DTOs.Requests
 
         [Phone]
         public string? PhoneNumber { get; init; }
+
+        public string? Notes { get; init; }
     }
 }

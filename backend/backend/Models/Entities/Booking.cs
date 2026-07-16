@@ -14,6 +14,7 @@ namespace backend.Models.Entities
         public Guid EventTypeId { get; set; }
         public EventType? EventType { get; set; }
 
+        [MaxLength(150)]
         public required string GuestName { get; set; }
 
         [EmailAddress]

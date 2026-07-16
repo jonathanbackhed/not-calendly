@@ -38,5 +38,11 @@ namespace backend.Cache
             var key = $"reservation:{userId}:{eventTypeId}:{startsAt:yyyy-MM-ddTHH:mm}";
             return _cache.TryGetValue(key, out _);
         }
+
+        public bool IsReservedWithToken(Guid userId, Guid eventTypeId, DateTime startsAt, string token)
+        {
+            var key = $"reservation:{userId}:{eventTypeId}:{startsAt:yyyy-MM-ddTHH:mm}";
+            return _cache.TryGetValue(key, out string? cachedToken) && cachedToken == token;
+        }
     }
 }

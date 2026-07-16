@@ -11,7 +11,7 @@ namespace backend.Models.DTOs.Requests
         public required string Email { get; init; }
 
         [Phone]
-        public string? PhoneNumber { get; init; }
+        public string? Phone { get; init; }
 
         public string? Notes { get; init; }
     }

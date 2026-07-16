@@ -64,7 +64,7 @@ namespace backend.Services
                 EventTypeId = eventType.Id,
                 GuestName = request.Name,
                 GuestEmail = request.Email,
-                GuestPhone = request.PhoneNumber,
+                GuestPhone = request.Phone,
                 StartsAt = startsAt,
                 EndsAt = startsAt.AddMinutes(eventType.DurationMinutes),
                 Status = BookingStatus.Pending,

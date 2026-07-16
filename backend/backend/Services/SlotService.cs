@@ -3,6 +3,7 @@ using backend.Data;
 using backend.Enums;
 using backend.Exceptions;
 using backend.Models.DTOs.Responses;
+using backend.Models.Entities;
 using backend.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
@@ -112,6 +113,63 @@ namespace backend.Services
             }
 
             return slots;
+        }
+
+        public async Task<bool> IsSlotAvailableAsync(string userSlug, string eventTypeSlug, DateTime startsAt, string reservationToken)
+        {
+            var eventType = await _dbc.EventTypes
+                .FirstOrDefaultAsync(r => r.Slug == eventTypeSlug && r.User!.Slug == userSlug && r.IsActive);
+            if (eventType is null)
+                throw new NotFoundException("Event type not found");
+
+            if (startsAt < DateTime.UtcNow)
+                return false;
+
+            var date = DateOnly.FromDateTime(startsAt);
+            var endsAt = startsAt.AddMinutes(eventType.DurationMinutes);
+            var slotStartTime = TimeOnly.FromDateTime(startsAt);
+            var slotEndTime = TimeOnly.FromDateTime(endsAt);
+
+            var availabilityRule = await _dbc.AvailabilityRules
+                .FirstOrDefaultAsync(r => r.UserId == eventType.UserId && r.IsActive && r.DayOfWeek == (int)startsAt.DayOfWeek);
+            if (availabilityRule is null)
+                return false;
+
+            if (slotStartTime < availabilityRule.StartTime || slotEndTime > availabilityRule.EndTime)
+                return false;
+
+            var availabilityOverride = await _dbc.AvailabilityOverrides
+                .FirstOrDefaultAsync(r => r.UserId == eventType.UserId && r.OverrideDate == date);
+            if (availabilityOverride is not null)
+            {
+                if (availabilityOverride.IsBlocked)
+                    return false;
+
+                if (availabilityOverride.StartTime.HasValue && availabilityOverride.EndTime.HasValue)
+                {
+                    if (slotStartTime < availabilityOverride.StartTime.Value || slotEndTime > availabilityOverride.EndTime.Value)
+                        return false;
+                }
+            }
+
+            var bufferStart = startsAt.AddMinutes(-eventType.BufferBeforeMinutes);
+            var bufferEnd = endsAt.AddMinutes(eventType.BufferAfterMinutes);
+
+            var hasConflict = await _dbc.Bookings
+                .AnyAsync(r => r.EventTypeId == eventType.Id
+                    && r.Status != BookingStatus.Cancelled
+                    && r.StartsAt < bufferEnd
+                    && r.EndsAt > bufferStart);
+            if (hasConflict)
+                return false;
+
+            if (_cache.IsReserved(eventType.UserId, eventType.Id, startsAt))
+            {
+                if (!_cache.IsReservedWithToken(eventType.UserId, eventType.Id, startsAt, reservationToken))
+                    return false;
+            }
+
+            return true;
         }
     }
 }

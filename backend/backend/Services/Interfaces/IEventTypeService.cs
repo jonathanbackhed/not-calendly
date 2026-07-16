@@ -6,6 +6,7 @@ namespace backend.Services.Interfaces
     public interface IEventTypeService
     {
         Task<IEnumerable<EventTypeResponse>> GetAsync(Guid userId);
+        Task<IEnumerable<EventTypeMinimalResponse>> GetFromSlugAsync(string slug);
         Task<EventTypeResponse> CreateAsync(Guid userId, EventTypeRequest request);
         Task<EventTypeResponse> UpdateAsync(Guid userId, Guid eventTypeId, EventTypeRequest request);
         Task DeleteAsync(Guid userId, Guid eventTypeId);

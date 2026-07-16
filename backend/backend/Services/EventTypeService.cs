@@ -101,6 +101,25 @@ namespace backend.Services
             return eventTypes;
         }
 
+        public async Task<IEnumerable<EventTypeMinimalResponse>> GetFromSlugAsync(string slug)
+        {
+            var eventTypes = await _dbc.EventTypes
+                .AsNoTracking()
+                .Where(r => r.User!.Slug == slug)
+                .Select(r => new EventTypeMinimalResponse
+                {
+                    Id = r.Id,
+                    Title = r.Title,
+                    Slug = r.Slug,
+                    DurationMinutes = r.DurationMinutes,
+                    LocationType = r.LocationType,
+                    LocationValue = r.LocationValue
+                })
+                .ToListAsync();
+
+            return eventTypes;
+        }
+
         public async Task<EventTypeResponse> UpdateAsync(Guid userId, Guid eventTypeId, EventTypeRequest request)
         {
             if (string.IsNullOrWhiteSpace(request.LocationValue))

@@ -6,6 +6,6 @@ namespace backend.Services.Interfaces
     public interface IBookingService
     {
         Task<BookingResponse> CreateBooking(BookingRequest request, string userSlug, string eventTypeSlug, DateTime startsAt);
-        Task<BookingResponse> CancelBooking(string userSlug, string eventTypeSlug, DateTime startsAt, string cancelToken);
+        Task<BookingResponse> CancelBooking(Guid bookingId, string cancelToken);
     }
 }

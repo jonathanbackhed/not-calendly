@@ -98,5 +98,15 @@ namespace backend.Controllers
 
             return Ok(booking);
         }
+
+        [HttpPut("bookings/cancel/{cancelToken}")]
+        public async Task<IActionResult> CancelSlot(string cancelToken)
+        {
+            var booking = await _bookingService.CancelBooking(cancelToken);
+
+            // Send cancellation email to host & user
+
+            return Ok(booking);
+        }
     }
 }

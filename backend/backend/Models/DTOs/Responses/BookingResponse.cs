@@ -8,7 +8,7 @@ namespace backend.Models.DTOs.Responses
         string? Phone,
         DateTime StartsAt,
         DateTime EndsAt,
-        BookingStatus Status,
+        string Status,
         string CancelToken,
         string? Notes
         );

@@ -68,10 +68,13 @@ GET {{baseUrl}}/public/johndoe/intro-call/availabledays?year=2026&month=7
 GET {{baseUrl}}/public/johndoe/intro-call/availableslots?date=2026-07-13
 
 ### Book slot
-POST {{baseUrl}}/public/johndoe/intro-call/bookings?startsAt=2026-07-20T13:00:00Z
+POST {{baseUrl}}/public/johndoe/intro-call/bookings?startsAt=2026-07-20T12:00:00Z
 Content-type: application/json
 {
   "Name": "Jane Doe",
   "Email": "jane@doe.com",
   "Phone": "0123456789"
 }
+
+### Cancel slot
+PUT {{baseUrl}}/public/bookings/cancel/20836fe3-35f5-4568-ab53-f84233b54809

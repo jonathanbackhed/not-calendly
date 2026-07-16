@@ -66,7 +66,7 @@ namespace backend.Services
                 GuestPhone = request.Phone,
                 StartsAt = startsAt,
                 EndsAt = startsAt.AddMinutes(eventType.DurationMinutes),
-                Status = BookingStatus.Pending,
+                Status = BookingStatus.Confirmed,
                 CancelToken = Guid.NewGuid().ToString("N"),
                 Notes = request.Notes,
                 CreatedAt = DateTime.UtcNow

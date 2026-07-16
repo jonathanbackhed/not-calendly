@@ -58,6 +58,9 @@ Content-type: application/json
   "IsActive": true
 }
 
+### Get available event types from slug
+GET {{baseUrl}}/public/johndoe
+
 ### Get available days for a specific month
 GET {{baseUrl}}/public/johndoe/intro-call/availabledays?year=2026&month=7
 

@@ -9,11 +9,22 @@ namespace backend.Controllers
     {
         private readonly ISlotService _slotService;
         private readonly IReservationService _reservationService;
+        private readonly IEventTypeService _eventTypeService;
 
-        public PublicController(ISlotService slotService, IReservationService reservationService)
+        public PublicController(ISlotService slotService, IReservationService reservationService, IEventTypeService eventTypeService)
         {
             _slotService = slotService;
             _reservationService = reservationService;
+            _eventTypeService = eventTypeService;
+        }
+
+        // AVAILABILITY
+        [HttpGet("{userSlug}")]
+        public async Task<IActionResult> GetEventTypes([FromRoute] string userSlug)
+        {
+            var eventTypes = await _eventTypeService.GetFromSlugAsync(userSlug);
+
+            return Ok(eventTypes);
         }
 
         [HttpGet("{userSlug}/{eventTypeSlug}/availabledays")]
@@ -32,6 +43,7 @@ namespace backend.Controllers
             return Ok(availableSlots);
         }
 
+        // RESERVE SLOT
         [HttpPost("{userSlug}/{eventTypeSlug}/reserveslot")]
         public async Task<IActionResult> ReserveSlot([FromRoute] string userSlug, [FromRoute] string eventTypeSlug, [FromQuery] DateTime startsAt)
         {

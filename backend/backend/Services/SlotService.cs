@@ -163,8 +163,11 @@ namespace backend.Services
             if (hasConflict)
                 return false;
 
-            if (!_cache.IsReservedWithToken(eventType.UserId, eventType.Id, startsAt, reservationToken))
-                return false;
+            if (_cache.IsReserved(eventType.UserId, eventType.Id, startsAt))
+            {
+                if (!_cache.IsReservedWithToken(eventType.UserId, eventType.Id, startsAt, reservationToken))
+                    return false;
+            }
 
             return true;
         }

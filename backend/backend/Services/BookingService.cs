@@ -20,17 +20,17 @@ namespace backend.Services
             _logger = logger;
         }
 
-        public async Task<BookingResponse> CancelBooking(string cancelToken)
+        public async Task CancelBooking(string cancelToken)
         {
             var booking = await _dbc.Bookings.FirstOrDefaultAsync(r => r.CancelToken == cancelToken);
             if (booking is null)
                 throw new NotFoundException("Booking not found");
 
             if (booking.Status == BookingStatus.Cancelled)
-                throw new InvalidOperationException("Cannot cancel already cancelled booking.");
+                throw new ConflictException("Booking is already cancelled.");
 
             if (booking.StartsAt < DateTime.UtcNow)
-                throw new InvalidOperationException("Cannot cancel a booking in the past.");
+                throw new ConflictException("Cannot cancel a booking in the past.");
 
             booking.Status = BookingStatus.Cancelled;
             booking.UpdatedAt = DateTime.UtcNow;
@@ -38,17 +38,6 @@ namespace backend.Services
             await _dbc.SaveChangesAsync();
 
             _logger.LogInformation("Booking {BookingId} canceled with correct token", booking.Id);
-
-            return new BookingResponse(
-                booking.GuestName,
-                booking.GuestEmail,
-                booking.GuestPhone,
-                booking.StartsAt,
-                booking.EndsAt,
-                booking.Status.ToString(),
-                booking.CancelToken,
-                booking.Notes
-            );
         }
 
         public async Task<BookingResponse> CreateBooking(BookingRequest request, string userSlug, string eventTypeSlug, DateTime startsAt)

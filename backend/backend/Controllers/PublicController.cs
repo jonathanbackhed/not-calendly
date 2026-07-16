@@ -82,9 +82,7 @@ namespace backend.Controllers
 
             var slotAvailable = await _slotService.IsSlotAvailableAsync(userSlug, eventTypeSlug, startsAt, reservationToken);
             if (!slotAvailable)
-            {
-                return BadRequest();
-            }
+                return Conflict(new { error = "This slot is no longer available." });
 
             var booking = await _bookingService.CreateBooking(request, userSlug, eventTypeSlug, startsAt);
 
@@ -96,17 +94,17 @@ namespace backend.Controllers
 
             // Send confirmation email to host & user
 
-            return Ok(booking);
+            return StatusCode(201, booking);
         }
 
-        [HttpPut("bookings/cancel/{cancelToken}")]
+        [HttpPost("bookings/cancel/{cancelToken}")]
         public async Task<IActionResult> CancelSlot(string cancelToken)
         {
-            var booking = await _bookingService.CancelBooking(cancelToken);
+            await _bookingService.CancelBooking(cancelToken);
 
             // Send cancellation email to host & user
 
-            return Ok(booking);
+            return NoContent();
         }
     }
 }

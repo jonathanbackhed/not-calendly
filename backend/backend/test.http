@@ -77,4 +77,4 @@ Content-type: application/json
 }
 
 ### Cancel slot
-PUT {{baseUrl}}/public/bookings/cancel/20836fe3-35f5-4568-ab53-f84233b54809
+POST {{baseUrl}}/public/bookings/cancel/20836fe3-35f5-4568-ab53-f84233b54809

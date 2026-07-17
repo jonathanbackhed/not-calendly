@@ -1,4 +1,5 @@
 ﻿using backend.Models.DTOs.Requests;
+using backend.Models.Entities;
 using backend.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
@@ -12,13 +13,15 @@ namespace backend.Controllers
         private readonly IReservationService _reservationService;
         private readonly IEventTypeService _eventTypeService;
         private readonly IBookingService _bookingService;
+        private readonly IEmailService _emailService;
 
-        public PublicController(ISlotService slotService, IReservationService reservationService, IEventTypeService eventTypeService, IBookingService bookingService)
+        public PublicController(ISlotService slotService, IReservationService reservationService, IEventTypeService eventTypeService, IBookingService bookingService, IEmailService emailService)
         {
             _slotService = slotService;
             _reservationService = reservationService;
             _eventTypeService = eventTypeService;
             _bookingService = bookingService;
+            _emailService = emailService;
         }
 
         // AVAILABILITY
@@ -92,7 +95,7 @@ namespace backend.Controllers
                 Response.Cookies.Delete("reservation_token");
             }
 
-            // Send confirmation email to host & user
+            await _emailService.SendConfirmationEmail(booking);
 
             return StatusCode(201, booking);
         }
@@ -102,7 +105,7 @@ namespace backend.Controllers
         {
             await _bookingService.CancelBooking(cancelToken);
 
-            // Send cancellation email to host & user
+            await _emailService.SendCancellationEmail(cancelToken);
 
             return NoContent();
         }

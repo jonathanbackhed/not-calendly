@@ -7,10 +7,12 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Resend;
 using Serilog;
 using Serilog.Events;
 using System.Text;
 using System.Threading.RateLimiting;
+using Log = Serilog.Log;
 
 Log.Logger = new LoggerConfiguration()
     .MinimumLevel.Information()
@@ -45,6 +47,7 @@ builder.Services.AddScoped<IEventTypeService, EventTypeService>();
 builder.Services.AddScoped<ISlotService, SlotService>();
 builder.Services.AddScoped<IReservationService, ReservationService>();
 builder.Services.AddScoped<IBookingService, BookingService>();
+builder.Services.AddScoped<IEmailService, EmailService>();
 
 var connString = builder.Configuration.GetConnectionString("DefaultConnection")
     ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
@@ -100,6 +103,17 @@ builder.Services.AddRateLimiter(options =>
         options.SegmentsPerWindow = 6;
     });
 });
+
+var resendApiKey = builder.Configuration["ResendApiKey"] 
+    ?? throw new InvalidOperationException("Resend api key not found in configuration.");
+
+builder.Services.AddOptions();
+builder.Services.AddHttpClient<ResendClient>();
+builder.Services.Configure<ResendClientOptions>(o =>
+{
+    o.ApiToken = resendApiKey;
+});
+builder.Services.AddTransient<IResend, ResendClient>();
 
 var app = builder.Build();
 

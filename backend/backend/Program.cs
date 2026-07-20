@@ -11,7 +11,9 @@ using Resend;
 using Serilog;
 using Serilog.Events;
 using System.Text;
+using System.Text.Json;
 using System.Threading.RateLimiting;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Log = Serilog.Log;
 
 Log.Logger = new LoggerConfiguration()
@@ -36,6 +38,12 @@ builder.Services.AddSerilog();
 
 builder.Services.AddControllers();
 
+var connString = builder.Configuration.GetConnectionString("DefaultConnection")
+                 ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+
+builder.Services.AddHealthChecks()
+    .AddNpgSql(connString);
+
 builder.Services.AddMemoryCache();
 builder.Services.AddSingleton<ReservationCache>();
 
@@ -48,9 +56,6 @@ builder.Services.AddScoped<ISlotService, SlotService>();
 builder.Services.AddScoped<IReservationService, ReservationService>();
 builder.Services.AddScoped<IBookingService, BookingService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
-
-var connString = builder.Configuration.GetConnectionString("DefaultConnection")
-    ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(connString));
@@ -120,6 +125,25 @@ var app = builder.Build();
 // Configure the HTTP request pipeline.
 
 app.UseHttpsRedirection();
+
+app.MapHealthChecks("/health", new HealthCheckOptions()
+{
+    ResponseWriter = async (context, report) =>
+    {
+        context.Response.ContentType = "application/json";
+        var result = JsonSerializer.Serialize(new
+        {
+            status = report.Status.ToString(),
+            checks = report.Entries.Select(e => new
+            {
+                name = e.Key,
+                status = e.Value.Status.ToString(),
+                description = e.Value.Description
+            })
+        });
+        await context.Response.WriteAsync(result);
+    }
+});
 
 app.UseAuthentication();
 app.UseAuthorization();

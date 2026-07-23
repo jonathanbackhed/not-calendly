@@ -2,7 +2,7 @@
 @plugin "@tailwindcss/forms";
 
 :root {
-  --background: #ffffff;
+  --background: oklch(97.11% 0.0034 67.78);
   --foreground: #171717;
 }
 
@@ -11,12 +11,12 @@
   --color-foreground: var(--foreground);
 }
 
-@media (prefers-color-scheme: dark) {
+/* @media (prefers-color-scheme: dark) {
   :root {
     --background: #0a0a0a;
     --foreground: #ededed;
   }
-}
+} */
 
 body {
   background: var(--background);

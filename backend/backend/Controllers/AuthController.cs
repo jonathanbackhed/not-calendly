@@ -25,9 +25,9 @@ namespace backend.Controllers
         {
             var result = await _authService.RegisterAsync(request);
 
-            SetTokenCookies(result.AccessToken, result.RefreshToken);
+            SetRefreshTokenCookie(result.RefreshToken);
 
-            return Ok(result);
+            return Ok(new { accessToken = result.AccessToken });
         }
 
         [HttpPost("login")]
@@ -35,9 +35,9 @@ namespace backend.Controllers
         {
             var result = await _authService.LoginAsync(request);
 
-            SetTokenCookies(result.AccessToken, result.RefreshToken);
+            SetRefreshTokenCookie(result.RefreshToken);
 
-            return Ok(result);
+            return Ok(new { accessToken = result.AccessToken });
         }
 
         [HttpPost("refresh")]
@@ -49,9 +49,9 @@ namespace backend.Controllers
 
             var result = await _authService.RefreshAsync(refreshToken);
 
-            SetTokenCookies(result.AccessToken, result.RefreshToken);
+            SetRefreshTokenCookie(result.RefreshToken);
 
-            return Ok(result);
+            return Ok(new { accessToken = result.AccessToken });
         }
 
         [Authorize]
@@ -64,13 +64,12 @@ namespace backend.Controllers
 
             await _authService.RevokeAsync(refreshToken);
 
-            Response.Cookies.Delete("access_token");
             Response.Cookies.Delete("refresh_token");
 
             return NoContent();
         }
 
-        private void SetTokenCookies(string accessToken, string refreshToken)
+        private void SetRefreshTokenCookie(string refreshToken)
         {
             var cookieOptions = new CookieOptions
             {
@@ -80,7 +79,6 @@ namespace backend.Controllers
                 Expires = DateTimeOffset.UtcNow.AddDays(double.Parse(_config["Jwt:RefreshTokenExpirationDays"]!))
             };
 
-            Response.Cookies.Append("access_token", accessToken, cookieOptions);
             Response.Cookies.Append("refresh_token", refreshToken, cookieOptions);
         }
     }

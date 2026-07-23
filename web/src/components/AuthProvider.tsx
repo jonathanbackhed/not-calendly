@@ -1,20 +1,18 @@
+"use client";
+
 import api from "@/lib/api";
 import { useAuthStore } from "@/lib/store";
-import { useRouter } from "next/navigation";
 import React, { useEffect } from "react";
 
-export default function AuthProvider({ children }: Readonly<{ children: React.ReactNode }>) {
+export default function AuthProvider({ children }: { children: React.ReactNode }) {
   const setAccessToken = useAuthStore((s) => s.setAccessToken);
-  const router = useRouter();
+  const setLoading = useAuthStore((s) => s.setLoading);
 
   useEffect(() => {
     api
       .post("/api/auth/refresh")
       .then(({ data }) => setAccessToken(data.accessToken))
-      .catch(() => {
-        useAuthStore.getState().setLoading(false);
-        router.replace("/login");
-      });
+      .catch(() => setLoading(false));
   }, []);
 
   return children;

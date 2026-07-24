@@ -7,7 +7,7 @@ export default function Navbar() {
   const accessToken = useAuthStore((s) => s.accessToken);
 
   return (
-    <nav className="bg-background sticky top-4 z-20 mx-auto -mt-6 flex h-12 max-w-3xl items-center justify-between rounded-full border-2 border-white px-4 shadow-xs">
+    <nav className="bg-background sticky top-4 z-20 mx-auto -mt-6 flex h-12 w-full max-w-3xl items-center justify-between rounded-full border-2 border-white px-4 shadow-xs">
       <div className="flex items-center gap-4">
         <span className="text-lg font-bold">Not-calendly</span>
         <div className="flex gap-4 text-sm">

@@ -5,7 +5,7 @@ export default function PublicNavbarLayout({ children, modal }: { children: Reac
   return (
     <>
       <Navbar />
-      <div className="px-4 py-10">
+      <div className="flex flex-1 flex-col pt-4">
         {children}
         {modal}
       </div>

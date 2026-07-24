@@ -1,4 +1,5 @@
-﻿using backend.Data;
+﻿using System.ComponentModel.DataAnnotations;
+using backend.Data;
 using backend.Models.DTOs.Requests;
 using backend.Models.DTOs.Responses;
 using backend.Models.Entities;
@@ -31,7 +32,7 @@ namespace backend.Services
             if (user is null || !BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
             {
                 _logger.LogWarning("Failed login attempt for email {Email}", request.Email);
-                throw new UnauthorizedAccessException("Invalid credentials.");
+                throw new ValidationException("Invalid credentials.");
             }
 
             _logger.LogInformation("User logged in with email {Email}", request.Email);

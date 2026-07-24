@@ -109,6 +109,20 @@ builder.Services.AddRateLimiter(options =>
     });
 });
 
+var frontendUrl = builder.Configuration["Frontend"] 
+                   ?? throw new InvalidOperationException("Frontend url not found in configuration.");
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowFrontend", policy =>
+    {
+        policy.WithOrigins(frontendUrl)
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+            .AllowCredentials();
+    });
+});
+
 var resendApiKey = builder.Configuration["ResendApiKey"] 
     ?? throw new InvalidOperationException("Resend api key not found in configuration.");
 
@@ -144,6 +158,8 @@ app.MapHealthChecks("/health", new HealthCheckOptions()
         await context.Response.WriteAsync(result);
     }
 });
+
+app.UseCors("AllowFrontend");
 
 app.UseAuthentication();
 app.UseAuthorization();

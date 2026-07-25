@@ -16,10 +16,6 @@ namespace backend.Models.Entities
 
         [Required]
         [MaxLength(50)]
-        public required string Username { get; set; }
-
-        [Required]
-        [MaxLength(50)]
         public required string Slug { get; set; }
 
         [Required]

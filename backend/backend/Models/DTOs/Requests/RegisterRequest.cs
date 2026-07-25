@@ -9,10 +9,6 @@ namespace backend.Models.DTOs.Requests
         public required string Email { get; init; }
 
         [Required]
-        [MaxLength(50)]
-        public required string Username { get; init; }
-
-        [Required]
         [MinLength(10)]
         [RegularExpression(@"^(?=.*[A-Z])(?=.*\d)(?=.*[!?/\@#$%^&*]).+$", 
             ErrorMessage = "Password must contain at least one uppercase letter, one number, and one special character.")]

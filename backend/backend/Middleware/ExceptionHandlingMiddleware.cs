@@ -13,6 +13,7 @@ namespace backend.Middleware
 			}
 			catch (UnauthorizedAccessException ex)
 			{
+                context.Response.Cookies.Delete("refresh_token");
 				context.Response.StatusCode = StatusCodes.Status401Unauthorized;
 				await context.Response.WriteAsJsonAsync(new { error = ex.Message });
             }

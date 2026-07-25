@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Google_Sans } from "next/font/google";
 import "./globals.css";
+import AuthProvider from "@/components/AuthProvider";
+import { Toaster } from "sonner";
 
 const googleSans = Google_Sans({
   variable: "--font-google-sans",
@@ -19,7 +21,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${googleSans.className} h-full antialiased`}>
-      <body className="flex min-h-full">{children}</body>
+      <body className="flex min-h-full">
+        <AuthProvider>
+          <Toaster />
+          {children}
+        </AuthProvider>
+      </body>
     </html>
   );
 }

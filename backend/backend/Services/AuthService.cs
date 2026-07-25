@@ -1,4 +1,5 @@
-﻿using backend.Data;
+﻿using System.ComponentModel.DataAnnotations;
+using backend.Data;
 using backend.Models.DTOs.Requests;
 using backend.Models.DTOs.Responses;
 using backend.Models.Entities;
@@ -31,7 +32,7 @@ namespace backend.Services
             if (user is null || !BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
             {
                 _logger.LogWarning("Failed login attempt for email {Email}", request.Email);
-                throw new UnauthorizedAccessException("Invalid credentials.");
+                throw new ValidationException("Invalid credentials.");
             }
 
             _logger.LogInformation("User logged in with email {Email}", request.Email);
@@ -67,9 +68,8 @@ namespace backend.Services
         {
             var existing = await _dbc.Users
                 .Where(u => u.Email == request.Email.ToLowerInvariant()
-                    || u.Username.ToLower() == request.Username.ToLower()
                     || u.Slug.ToLower() == request.Slug.ToLower())
-                .Select(u => new { u.Email, u.Username, u.Slug })
+                .Select(u => new { u.Email, u.Slug })
                 .FirstOrDefaultAsync();
 
             if (existing is not null)
@@ -78,11 +78,6 @@ namespace backend.Services
                 {
                     _logger.LogWarning("Registration attempt with existing email {Email}", request.Email);
                     throw new InvalidOperationException("Email already in use.");
-                }
-                if (existing.Username.ToLower() == request.Username.ToLower())
-                {
-                    _logger.LogWarning("Registration attempt with existing username {Username}", request.Username);
-                    throw new InvalidOperationException("Username already in use.");
                 }
                 if (existing.Slug.ToLower() == request.Slug.ToLower())
                 {
@@ -96,7 +91,6 @@ namespace backend.Services
                 Id = Guid.NewGuid(),
                 Email = request.Email.ToLowerInvariant(),
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password, workFactor: 12),
-                Username = request.Username,
                 Slug = request.Slug,
                 CreatedAt = DateTime.UtcNow,
             };

@@ -23,7 +23,6 @@ namespace backend.Data
             modelBuilder.Entity<User>(entity =>
             {
                 entity.HasIndex(u => u.Email).IsUnique();
-                entity.HasIndex(u => u.Username).IsUnique();
                 entity.HasIndex(u => u.Slug).IsUnique();
             });
 

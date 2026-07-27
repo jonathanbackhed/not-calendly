@@ -10,8 +10,8 @@ export default function Home() {
         <p className="text-center">
           Share your booking link and let clients schedule time with you - no back-and-forth, no hassle.
         </p>
-        <Link href={"#"} className="rounded-full bg-black px-8 py-4 text-white shadow-xs">
-          How it works
+        <Link href={"/login"} className="rounded-full bg-black px-8 py-4 text-white shadow-xs">
+          Get started today
         </Link>
       </div>
     </div>

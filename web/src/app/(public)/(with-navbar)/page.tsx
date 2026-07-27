@@ -1,3 +1,4 @@
+import FeaturePreview from "@/components/features/home/FeaturePreview";
 import Link from "next/link";
 
 export default function Home() {
@@ -14,6 +15,8 @@ export default function Home() {
           Get started today
         </Link>
       </div>
+
+      <FeaturePreview />
     </div>
   );
 }

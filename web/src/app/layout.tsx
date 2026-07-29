@@ -1,11 +1,16 @@
 import type { Metadata } from "next";
-import { Google_Sans } from "next/font/google";
+import { Google_Sans, Newsreader } from "next/font/google";
 import "./globals.css";
 import AuthProvider from "@/components/AuthProvider";
 import { Toaster } from "sonner";
 
 const googleSans = Google_Sans({
   variable: "--font-google-sans",
+  subsets: ["latin"],
+});
+
+const newsreader = Newsreader({
+  variable: "--font-newsreader",
   subsets: ["latin"],
 });
 
@@ -20,7 +25,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${googleSans.className} h-full antialiased`}>
+    <html lang="en" className={`${googleSans.variable} ${newsreader.variable} h-full antialiased`}>
       <body className="flex min-h-full">
         <AuthProvider>
           <Toaster />

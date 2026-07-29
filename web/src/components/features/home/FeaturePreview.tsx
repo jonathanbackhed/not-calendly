@@ -7,9 +7,9 @@ export default function FeaturePreview() {
   const [index, setIndex] = useState(0);
 
   return (
-    <div className="flex flex-1 flex-col items-center justify-center px-48">
-      <div className="mx-48 aspect-square w-full bg-white">{index}</div>
-      <div className="flex w-full">
+    <div className="mx-48 flex flex-col items-center justify-center">
+      <div className="aspect-square w-full bg-white">{index}</div>
+      <div className="mt-4 flex w-full">
         <button
           onClick={() => setIndex(0)}
           className={cn(

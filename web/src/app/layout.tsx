@@ -3,6 +3,7 @@ import { Google_Sans, Newsreader } from "next/font/google";
 import "./globals.css";
 import AuthProvider from "@/components/AuthProvider";
 import { Toaster } from "sonner";
+import QueryProvider from "@/components/QueryProvider";
 
 const googleSans = Google_Sans({
   variable: "--font-google-sans",
@@ -27,10 +28,12 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${googleSans.variable} ${newsreader.variable} h-full antialiased`}>
       <body className="flex min-h-full">
-        <AuthProvider>
-          <Toaster />
-          {children}
-        </AuthProvider>
+        <QueryProvider>
+          <AuthProvider>
+            <Toaster />
+            {children}
+          </AuthProvider>
+        </QueryProvider>
       </body>
     </html>
   );
